@@ -20,19 +20,60 @@ if 'final_threat_count' not in st.session_state:
 if 'analysis_data' not in st.session_state:
     st.session_state.analysis_data = None
 
-# Sidebar menu
-st.sidebar.title("🌟 Navigation")
-page = st.sidebar.radio(
-    "Go to",
-    ["Dashboard", "Alert Analysis", "Threat Intelligence", "Reports", "Settings"]
-)
+# Sidebar menu with enhanced styling
+st.sidebar.markdown("""
+<div style="text-align: center; padding: 20px 0;">
+    <h1 style="color: #a5b4fc; font-size: 28px; margin: 0; text-shadow: 0 0 20px rgba(165, 180, 252, 0.5);">
+        🛡️ RedFlag SOC
+    </h1>
+    <p style="color: #c7d2fe; font-size: 12px; margin-top: 5px; letter-spacing: 2px;">
+        SECURITY OPERATIONS CENTER
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
 st.sidebar.markdown("---")
-st.sidebar.markdown("### Quick Stats")
+
+# Navigation menu with icons
+menu_items = {
+    "🏠 Dashboard": "Dashboard",
+    "📊 Alert Analysis": "Alert Analysis",
+    "🔍 Threat Intelligence": "Threat Intelligence",
+    "📄 Reports": "Reports",
+    "⚙️ Settings": "Settings"
+}
+
+# Initialize page in session state if not exists
+if 'current_page' not in st.session_state:
+    st.session_state.current_page = "Dashboard"
+
+# Create button-based navigation
+for display_name, page_name in menu_items.items():
+    # Check if this is the current page
+    is_active = st.session_state.current_page == page_name
+    
+    # Create clickable button with hidden label, styled card will show
+    if st.sidebar.button(
+        display_name,
+        key=f"nav_{page_name}",
+        use_container_width=True,
+        type="primary" if is_active else "secondary"
+    ):
+        st.session_state.current_page = page_name
+        st.rerun()
+
+# Get the current page value
+page = st.session_state.current_page
+
+st.sidebar.markdown("---")
+st.sidebar.markdown('<p style="color: #a5b4fc; font-weight: 600; font-size: 16px; margin-bottom: 15px;">📈 Quick Stats</p>', unsafe_allow_html=True)
 st.sidebar.metric("Active Alerts", "47", delta="12", delta_color="normal")
 st.sidebar.metric("Response Time", "1.8s", delta="-0.5s", delta_color="inverse")
 st.sidebar.markdown("---")
 st.sidebar.info("💡 Upload a CSV file to analyze security alerts")
+
+# Add a footer to sidebar
+
 
 # Custom CSS for comforting theme
 st.markdown("""
@@ -235,24 +276,113 @@ st.markdown("""
         border-radius: 8px;
     }
     
-    /* Radio buttons */
+    /* Radio buttons - Completely hide radio circles and style as menu buttons */
+    
+    /* Hide all radio button circles */
+    [data-testid="stSidebar"] .row-widget.stRadio div[role="radiogroup"] > label > div[data-testid="stMarkdownContainer"] ~ div {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+        opacity: 0 !important;
+    }
+    
+    /* Main radio container */
+    [data-testid="stSidebar"] .row-widget.stRadio {
+        background: transparent;
+    }
+    
     [data-testid="stSidebar"] .row-widget.stRadio > div {
-        background: rgba(99, 102, 241, 0.1);
-        border-radius: 12px;
-        padding: 5px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        background: transparent;
+        padding: 0;
     }
     
-    /* Radio button labels */
+    /* Each menu button */
     [data-testid="stSidebar"] .row-widget.stRadio label {
-        color: #c7d2fe !important;
-        padding: 10px 15px;
-        border-radius: 10px;
-        transition: all 0.3s ease;
+        display: flex !important;
+        align-items: center !important;
+        background: rgba(45, 53, 97, 0.4) !important;
+        padding: 16px 20px !important;
+        margin: 0 !important;
+        border-radius: 12px !important;
+        border: 2px solid rgba(99, 102, 241, 0.2) !important;
+        cursor: pointer !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        position: relative !important;
+        width: 100% !important;
     }
     
+    /* Hide the SVG radio circle icon */
+    [data-testid="stSidebar"] .row-widget.stRadio label svg {
+        display: none !important;
+    }
+    
+    /* Hide any div that looks like a radio button */
+    [data-testid="stSidebar"] .row-widget.stRadio label > div:first-child:not([data-testid="stMarkdownContainer"]) {
+        display: none !important;
+    }
+    
+    /* Menu text styling */
+    [data-testid="stSidebar"] .row-widget.stRadio label p,
+    [data-testid="stSidebar"] .row-widget.stRadio label div[data-testid="stMarkdownContainer"],
+    [data-testid="stSidebar"] .row-widget.stRadio label div[data-testid="stMarkdownContainer"] p {
+        color: #c7d2fe !important;
+        font-weight: 500 !important;
+        font-size: 15px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* Hover effect */
     [data-testid="stSidebar"] .row-widget.stRadio label:hover {
-        background: rgba(99, 102, 241, 0.2);
-        color: #a5b4fc !important;
+        background: rgba(99, 102, 241, 0.3) !important;
+        border-color: rgba(165, 180, 252, 0.6) !important;
+        transform: translateX(8px) !important;
+        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4) !important;
+    }
+    
+    [data-testid="stSidebar"] .row-widget.stRadio label:hover p,
+    [data-testid="stSidebar"] .row-widget.stRadio label:hover div[data-testid="stMarkdownContainer"] p {
+        color: #ffffff !important;
+    }
+    
+    /* Selected/Active state - target the label when input is checked */
+    [data-testid="stSidebar"] .row-widget.stRadio input:checked + label,
+    [data-testid="stSidebar"] .row-widget.stRadio label[data-checked="true"] {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+        border-color: #a5b4fc !important;
+        box-shadow: 0 6px 24px rgba(99, 102, 241, 0.6) !important;
+        transform: translateX(0) !important;
+    }
+    
+    [data-testid="stSidebar"] .row-widget.stRadio input:checked + label p,
+    [data-testid="stSidebar"] .row-widget.stRadio input:checked + label div[data-testid="stMarkdownContainer"] p,
+    [data-testid="stSidebar"] .row-widget.stRadio label[data-checked="true"] p,
+    [data-testid="stSidebar"] .row-widget.stRadio label[data-checked="true"] div[data-testid="stMarkdownContainer"] p {
+        color: #ffffff !important;
+        font-weight: 600 !important;
+    }
+    
+    /* Left accent bar */
+    [data-testid="stSidebar"] .row-widget.stRadio label::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 4px;
+        background: linear-gradient(180deg, #6366f1 0%, #8b5cf6 100%);
+        border-radius: 12px 0 0 12px;
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+    }
+    
+    [data-testid="stSidebar"] .row-widget.stRadio label:hover::before,
+    [data-testid="stSidebar"] .row-widget.stRadio input:checked + label::before,
+    [data-testid="stSidebar"] .row-widget.stRadio label[data-checked="true"]::before {
+        transform: scaleY(1);
     }
     
     /* Block container padding */
@@ -367,6 +497,63 @@ st.markdown("""
         margin: 30px 0;
         opacity: 0.5;
     }
+    
+    /* Style navigation buttons as cards */
+    [data-testid="stSidebar"] .stButton > button {
+        background: rgba(45, 53, 97, 0.4) !important;
+        color: #c7d2fe !important;
+        border: 2px solid rgba(99, 102, 241, 0.2) !important;
+        border-radius: 12px !important;
+        padding: 16px 20px !important;
+        font-weight: 500 !important;
+        font-size: 15px !important;
+        transition: all 0.3s ease !important;
+        text-transform: none !important;
+        letter-spacing: 0 !important;
+        box-shadow: none !important;
+        width: 100% !important;
+        text-align: left !important;
+        position: relative !important;
+        margin: 8px 0 !important;
+    }
+    
+    [data-testid="stSidebar"] .stButton > button:hover {
+        background: rgba(99, 102, 241, 0.3) !important;
+        border-color: rgba(165, 180, 252, 0.6) !important;
+        transform: translateX(8px) !important;
+        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4) !important;
+        color: #ffffff !important;
+    }
+    
+    /* Active button style */
+    [data-testid="stSidebar"] .stButton > button[kind="primary"],
+    [data-testid="stSidebar"] .stButton > button[data-baseweb="button"][kind="primary"] {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+        border-color: #a5b4fc !important;
+        box-shadow: 0 6px 24px rgba(99, 102, 241, 0.6) !important;
+        color: #ffffff !important;
+        font-weight: 600 !important;
+        transform: translateX(0) !important;
+    }
+    
+    /* Left accent bar for buttons */
+    [data-testid="stSidebar"] .stButton > button::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 4px;
+        background: linear-gradient(180deg, #6366f1 0%, #8b5cf6 100%);
+        border-radius: 12px 0 0 12px;
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+    }
+    
+    [data-testid="stSidebar"] .stButton > button:hover::before,
+    [data-testid="stSidebar"] .stButton > button[kind="primary"]::before {
+        transform: scaleY(1);
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -445,7 +632,7 @@ if page == "Dashboard":
             showlegend=True,
             height=400
         )
-        st.plotly_chart(fig_pie, use_container_width=True)
+        st.plotly_chart(fig_pie, width='stretch')
     
     with col2:
         # Bar Chart - Weekly Threat Trends
@@ -470,7 +657,7 @@ if page == "Dashboard":
             xaxis=dict(gridcolor='rgba(165, 180, 252, 0.1)'),
             height=400
         )
-        st.plotly_chart(fig_bar, use_container_width=True)
+        st.plotly_chart(fig_bar, width='stretch')
     
     # Line Chart - Threat Timeline
     st.markdown("<br>", unsafe_allow_html=True)
@@ -506,7 +693,7 @@ if page == "Dashboard":
         height=400,
         hovermode='x unified'
     )
-    st.plotly_chart(fig_line, use_container_width=True)
+    st.plotly_chart(fig_line, width='stretch')
 
 elif page == "Alert Analysis":
     st.title("📊 Alert Analysis")
@@ -563,7 +750,7 @@ elif page == "Alert Analysis":
             font=dict(color='#c7d2fe', family='Poppins'),
             height=400
         )
-        st.plotly_chart(fig_severity, use_container_width=True)
+        st.plotly_chart(fig_severity, width='stretch')
     
     with col2:
         # Alert Types
@@ -589,7 +776,7 @@ elif page == "Alert Analysis":
             xaxis=dict(gridcolor='rgba(165, 180, 252, 0.1)'),
             height=400
         )
-        st.plotly_chart(fig_types, use_container_width=True)
+        st.plotly_chart(fig_types, width='stretch')
 
 elif page == "Threat Intelligence":
     st.title("🔍 Threat Intelligence")
@@ -657,7 +844,7 @@ elif page == "Threat Intelligence":
             xaxis=dict(gridcolor='rgba(165, 180, 252, 0.1)'),
             height=400
         )
-        st.plotly_chart(fig_countries, use_container_width=True)
+        st.plotly_chart(fig_countries, width='stretch')
     
     with col2:
         # Threat Categories
@@ -679,7 +866,7 @@ elif page == "Threat Intelligence":
             font=dict(color='#c7d2fe', family='Poppins'),
             height=400
         )
-        st.plotly_chart(fig_cat, use_container_width=True)
+        st.plotly_chart(fig_cat, width='stretch')
 
 elif page == "Reports":
     st.title("📄 Reports")
@@ -745,7 +932,7 @@ elif page == "Reports":
         height=400,
         hovermode='x unified'
     )
-    st.plotly_chart(fig_performance, use_container_width=True)
+    st.plotly_chart(fig_performance, width='stretch')
 
 elif page == "Settings":
     st.title("⚙️ Settings")
